@@ -1,0 +1,8 @@
+[package]
+name = "rauc"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+tokio = { workspace = true, default-features = false, features = ["macros", "rt-multi-thread"] }
+zbus = { version = "5.16.0", default-features = false, features = ["tokio"] }

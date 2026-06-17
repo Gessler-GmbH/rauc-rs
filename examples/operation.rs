@@ -1,0 +1,14 @@
+use zbus::{Connection, Result};
+
+use rauc::InstallerProxy;
+
+#[tokio::main]
+async fn main() -> Result<()> {
+    let connection = Connection::system().await?;
+    let proxy = InstallerProxy::new(&connection).await?;
+    let reply = proxy.operation().await?;
+
+    println!("{:?}", reply);
+
+    Ok(())
+}
