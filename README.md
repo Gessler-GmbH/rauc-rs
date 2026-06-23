@@ -10,8 +10,8 @@ service over the system D-Bus. The first exposed interface is
 
 * Provide an idiomatic Rust interface for RAUC
 * Support communication with the RAUC D-Bus service
-* Keep the public API thin and close to the upstream D-Bus interface
 * Provide examples for common RAUC operations
+* Provide struct definitions for raw D-Bus message types
 
 ## Usage
 

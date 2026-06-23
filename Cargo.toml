@@ -5,4 +5,6 @@ edition = "2024"
 
 [dependencies]
 tokio = { workspace = true, default-features = false, features = ["macros", "rt-multi-thread"] }
+serde = { workspace = true }
+
 zbus = { version = "5.16.0", default-features = false, features = ["tokio"] }
