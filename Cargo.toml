@@ -2,7 +2,15 @@
 name = "rauc"
 version = "0.1.0"
 edition = "2024"
+rust-version = "1.85"
+description = "Build reliable embedded Linux updates with Rust."
 license = "Apache-2.0"
+repository = "https://github.com/Gessler-GmbH/rauc-rs"
+homepage = "https://github.com/Gessler-GmbH/rauc-rs"
+documentation = "https://docs.rs/rauc"
+readme = "README.md"
+keywords = ["rauc", "dbus", "linux", "embedded"]
+categories = ["api-bindings", "asynchronous", "embedded"]
 
 [dependencies]
 tokio = { version = "1", default-features = false, features = ["macros", "rt-multi-thread"] }
