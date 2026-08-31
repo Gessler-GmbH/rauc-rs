@@ -7,7 +7,7 @@ use zbus::zvariant::{DeserializeDict, SerializeDict};
 use zbus::zvariant::{OwnedValue, Type};
 
 /// Custom type for the GetArtifactStatus method.
-/// Check https://github.com/rauc/rauc/blob/master/src/artifacts.c for reference.
+/// Check <https://github.com/rauc/rauc/blob/master/src/artifacts.c> for reference.
 #[derive(DeserializeDict, Type, PartialEq, Debug)]
 #[zvariant(signature = "a{sv}", rename_all = "kebab-case")]
 pub struct ArtifactStatusInfo {
