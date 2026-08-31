@@ -1,4 +1,6 @@
 target/
 generated/
 
+Cargo.lock
+
 .idea/
