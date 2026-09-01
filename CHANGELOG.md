@@ -9,3 +9,6 @@
 - Typed structures for bundle metadata, installation options, slot states, and progress information.
 - Access to RAUC installer properties and the installation-completed signal.
 - Example demonstrating how to query RAUC's `Operation` property.
+
+[Unreleased]: https://github.com/Gessler-GmbH/rauc-rs/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/Gessler-GmbH/rauc-rs/releases/tag/v0.1.0
