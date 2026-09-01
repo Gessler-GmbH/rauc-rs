@@ -1,9 +1,11 @@
 ## [Unreleased]
 
+## [0.1.0] - 2026-09-01
+
 ### Added
-* Added support for custom InspectBundle data.
-* Added basic Enums for RAUC status values.
-* Added readonly tests that run against a real RAUC service.
-* Added mutating tests for installing bundles.
-* Added generated RAUC D-Bus installer proxy
-* Added RAUC API examples
+- Initial asynchronous Rust bindings for the RAUC D-Bus installer API.
+- APIs for inspecting and installing bundles.
+- APIs for querying artifact and slot status and marking slots.
+- Typed structures for bundle metadata, installation options, slot states, and progress information.
+- Access to RAUC installer properties and the installation-completed signal.
+- Example demonstrating how to query RAUC's `Operation` property.
