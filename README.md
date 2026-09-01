@@ -8,7 +8,7 @@ built with [zbus](https://docs.rs/zbus).
 | | |
 | --- | --- |
 | **Platform** | Linux |
-| **Rust** | 1.85+ · Edition 2024 |
+| **Rust** | 1.87+ · Edition 2024 |
 | **RAUC** | D-Bus API shipped with 1.15.2 |
 | **Interface** | `de.pengutronix.rauc.Installer` |
 | **Connection** | System bus |
