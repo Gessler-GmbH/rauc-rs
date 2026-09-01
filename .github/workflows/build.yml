@@ -64,14 +64,11 @@ jobs:
           curl -fsSL "https://raw.githubusercontent.com/rauc/rauc/$latest_tag/$interface" -o latest.xml
 
           if ! cmp -s pinned.xml latest.xml; then
-            message="RAUC interface changed between $pinned_tag and $latest_tag."
+            echo "::warning::The RAUC D-Bus interface changed between $pinned_tag and $latest_tag."
 
-            echo "::warning::$message"
             {
-              echo "## ⚠️ RAUC interface update detected"
-              echo
-              echo "$message"
-              echo
-              echo "Consider updating the Rust bindings."
+              echo "### ⚠️ RAUC interface changed"
+              echo ""
+              echo "The D-Bus interface changed between \`$pinned_tag\` and \`$latest_tag\`."
             } >> "$GITHUB_STEP_SUMMARY"
           fi
