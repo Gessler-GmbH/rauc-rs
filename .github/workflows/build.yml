@@ -1,48 +1,49 @@
-name: build
+name: CI
 
-on: push
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
 
 jobs:
-  codestyle:
+  fmt:
+    name: Format
     runs-on: ubuntu-latest
     steps:
-      - name: Set up Rust
-        uses: hecrj/setup-rust-action@v2
+      - uses: actions/checkout@v6
+      - uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt
-          rust-version: stable
-      - uses: actions/checkout@v4
       - run: cargo fmt --all -- --check
 
-  lint:
+  clippy:
+    name: Clippy
     runs-on: ubuntu-latest
     steps:
-      - name: Set up Rust
-        uses: hecrj/setup-rust-action@v2
+      - uses: actions/checkout@v6
+      - uses: dtolnay/rust-toolchain@stable
         with:
           components: clippy
-      - uses: actions/checkout@v4
-      - run: |
-            sudo apt update && sudo apt install libdbus-1-dev libudev-dev pkg-config
-            cargo clippy --all-targets --all-features -- -D clippy::all
+      - run: cargo clippy --all-targets --all-features -- -D warnings
 
-  compile:
-    needs: [codestyle, lint]
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macOS-latest]
-        rust: [stable]
-    runs-on: ${{ matrix.os }}
-
+  test:
+    name: Test
+    runs-on: ubuntu-latest
     steps:
-      - name: Setup Rust
-        uses: hecrj/setup-rust-action@v2
-        with:
-          rust-version: ${{ matrix.rust }}
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: deps
-        if: ${{ matrix.os == 'ubuntu-latest'}}
-        run: sudo apt update && sudo apt install libdbus-1-dev libudev-dev pkg-config
-      - name: check
-        run: cargo check --all
+      - uses: actions/checkout@v6
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo test --all-targets --all-features
+
+  msrv:
+    name: MSRV (Rust 1.85)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dtolnay/rust-toolchain@1.85.0
+      - run: cargo check --all-targets --all-features
