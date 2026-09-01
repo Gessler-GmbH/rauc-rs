@@ -1,9 +1,8 @@
 name: CI
 
 on:
-  push:
-    branches: [main]
   pull_request:
+    branches: [main]
 
 permissions:
   contents: read
@@ -40,35 +39,32 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - run: cargo test --all-targets --all-features
 
-  msrv:
-    name: MSRV (Rust 1.87)
+  rust:
+    name: Rust
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
       - uses: dtolnay/rust-toolchain@1.87.0
       - run: cargo check --all-targets --all-features
 
-  rauc-interface:
-    name: RAUC interface
+  rauc:
+    name: Rauc
     runs-on: ubuntu-latest
     steps:
       - name: Check latest RAUC release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          pinned_tag=v1.10.1
-          latest_tag=$(gh api repos/rauc/rauc/releases/latest --jq .tag_name)
+          pinned=v1.10.1
+          latest=$(gh api repos/rauc/rauc/releases/latest --jq .tag_name)
+          
           interface=src/de.pengutronix.rauc.Installer.xml
+          rauc=https://raw.githubusercontent.com/rauc/rauc
+          
+          curl -fsSL "$rauc/$pinned/$interface" -o pinned.xml
+          curl -fsSL "$rauc/$latest/$interface" -o latest.xml
 
-          curl -fsSL "https://raw.githubusercontent.com/rauc/rauc/$pinned_tag/$interface" -o pinned.xml
-          curl -fsSL "https://raw.githubusercontent.com/rauc/rauc/$latest_tag/$interface" -o latest.xml
-
-          if ! cmp -s pinned.xml latest.xml; then
-            echo "::warning::The RAUC D-Bus interface changed between $pinned_tag and $latest_tag."
-
-            {
-              echo "### ⚠️ RAUC interface changed"
-              echo ""
-              echo "The D-Bus interface changed between \`$pinned_tag\` and \`$latest_tag\`."
-            } >> "$GITHUB_STEP_SUMMARY"
+          if ! cmp --quite pinned.xml latest.xml; then
+            echo "::error::The RAUC D-Bus interface changed between $pinned and $latest."
+            exit 1
           fi
