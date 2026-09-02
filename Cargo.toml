@@ -6,7 +6,7 @@ rust-version = "1.87"
 description = "Build reliable embedded Linux updates with Rust."
 license = "Apache-2.0"
 repository = "https://github.com/Gessler-GmbH/rauc-rs"
-homepage = "https://github.com/Gessler-GmbH/rauc-rs"
+homepage = "https://www.gessler.eu"
 documentation = "https://docs.rs/rauc"
 readme = "README.md"
 keywords = ["rauc", "dbus", "linux", "embedded"]
@@ -16,3 +16,6 @@ categories = ["api-bindings", "asynchronous", "embedded"]
 tokio = { version = "1", default-features = false, features = ["macros", "rt-multi-thread"] }
 serde = { version = "1.0", features = ["derive"] }
 zbus = { version = "5.16.0", default-features = false, features = ["tokio"] }
+
+[dev-dependencies]
+futures-util = {version = "0.3.34"}

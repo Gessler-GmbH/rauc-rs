@@ -5,13 +5,13 @@ built with [zbus](https://docs.rs/zbus).
 
 ## Compatibility
 
-| Component  | Support                         |
-|------------|---------------------------------|
-| Platform   | Linux                           |
-| Connection | System bus                      |
+| Component  | Support                       |
+|------------|-------------------------------|
+| Platform   | Linux                         |
+| Connection | System bus                    |
 | Interface  | `de.pengutronix.rauc.Installer` |
-| Rauc       | [_RAUC_VERSION_](RAUC_VERSION)  |
-| Rust       | 1.87+                           |
+| Rauc       | [RAUC_VERSION](RAUC_VERSION)  |
+| Rust       | 1.87+                         |
 
 ## Installation
 
@@ -30,9 +30,8 @@ async fn main() -> Result<()> {
     let connection = Connection::system().await?;
     let proxy = InstallerProxy::new(&connection).await?;
 
-    let reply = proxy.operation().await?;
-
-    println!("{:?}", reply);
+    let slots = proxy.get_slot_status().await?;
+    println!("{slots:#?}");
 
     Ok(())
 }
@@ -41,20 +40,31 @@ async fn main() -> Result<()> {
 See the [API documentation](https://docs.rs/rauc) for all available methods and
 types.
 
-## System Tests
+## Examples
 
 > [!CAUTION]
 > Installing bundles and marking slots modify the target system.
 
 ```bash
-# Read-only tests
-cargo test --test rauc_readonly -- --ignored
+# Each read-only example is named after its RAUC operation
+cargo run --example get_slot_status
+
+# Bundle inspection takes a path or URL
+cargo run --example inspect_bundle -- path/to/update.raucb
+
+# Receives installation progress changes
+cargo run --example receive_progress_changed
+
+# Receives the installation-completed signal
+cargo run --example receive_completed
 ```
 
 ```bash
+# Marks a slot as good, bad, or active
+cargo run --example mark -- good booted
+
 # Installs a specified bundle
-RAUC_TEST_BUNDLE={path/to/update.raucb}
-cargo test --test rauc_mutating -- --ignored
+cargo run --example install_bundle -- path/to/update.raucb
 ```
 
 ## Initial interface generation
