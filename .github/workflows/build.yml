@@ -52,19 +52,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check latest RAUC release
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
           pinned=v1.15.2
-          latest=$(gh api repos/rauc/rauc/releases/latest --jq .tag_name)
-          
+          latest=$(git ls-remote --tags --refs https://github.com/rauc/rauc.git | cut -d/ -f3 | sort -V | tail -1)
+
           interface=src/de.pengutronix.rauc.Installer.xml
           rauc=https://raw.githubusercontent.com/rauc/rauc
-          
+
           curl -fsSL "$rauc/$pinned/$interface" -o pinned.xml
           curl -fsSL "$rauc/$latest/$interface" -o latest.xml
 
-          if ! cmp --quite pinned.xml latest.xml; then
+          if ! cmp --silent pinned.xml latest.xml; then
             echo "::error::The RAUC D-Bus interface changed between $pinned and $latest."
-            exit 1
+            diff -u --label "$pinned" pinned.xml --label "$latest" latest.xml
           fi
