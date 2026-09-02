@@ -1,5 +1,5 @@
 <!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN" "https://specifications.freedesktop.org/dbus/introspect-latest.dtd">
-<!-- SPDX-License-Identifier: CC0-1.0 -->
+<!-- License note: This file is considered data and thus no license is needed for any usage. -->
 <node>
   <interface name="de.pengutronix.rauc.Installer">
     <!--
@@ -36,7 +36,7 @@
       <arg name="compatible" type="s" direction="out" />
       <arg name="version" type="s" direction="out" />
     </method>
-
+ 
     <!--
          InspectBundle: D-Bus variant of rauc info <bundle>
          @source: Path or URL to the queried bundle.
@@ -48,7 +48,6 @@
       <arg name="args" type="a{sv}" direction="in"/>
       <annotation name="org.qtproject.QtDBus.QtTypeName.In1" value="QVariantMap"/>
       <arg name="info" type="a{sv}" direction="out"/>
-      <annotation name="org.qtproject.QtDBus.QtTypeName.Out0" value="QVariantMap"/>
     </method>
 
     <!--
@@ -80,15 +79,6 @@
     <method name="GetSlotStatus">
       <arg name="slot_status_array" type="a(sa{sv})" direction="out"/>
       <annotation name="org.qtproject.QtDBus.QtTypeName.Out0" value="RaucSlotStatusArray"/>
-    </method>
-
-    <!--
-         GetArtifactStatus:
-         @artifacts: string variant dict of artifact and repository information
-    -->
-    <method name="GetArtifactStatus">
-      <arg name="artifacts" type="aa{sv}" direction="out"/>
-      <annotation name="org.qtproject.QtDBus.QtTypeName.Out0" value="QList&lt;QVariantMap>"/>
     </method>
 
     <!-- Operation: Represents the current (global) operation rauc performs -->

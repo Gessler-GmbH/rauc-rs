@@ -1,9 +1,8 @@
 name: CI
 
 on:
-  push:
-    branches: [main]
   pull_request:
+    branches: [main]
 
 permissions:
   contents: read
@@ -40,10 +39,30 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - run: cargo test --all-targets --all-features
 
-  msrv:
-    name: MSRV (Rust 1.85)
+  rust:
+    name: Rust
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: dtolnay/rust-toolchain@1.85.0
+      - uses: dtolnay/rust-toolchain@1.87.0
       - run: cargo check --all-targets --all-features
+
+  rauc:
+    name: Rauc
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check latest RAUC release
+        run: |
+          pinned=v1.15.2
+          latest=$(git ls-remote --tags --refs https://github.com/rauc/rauc.git | cut -d/ -f3 | sort -V | tail -1)
+
+          interface=src/de.pengutronix.rauc.Installer.xml
+          rauc=https://raw.githubusercontent.com/rauc/rauc
+
+          curl -fsSL "$rauc/$pinned/$interface" -o pinned.xml
+          curl -fsSL "$rauc/$latest/$interface" -o latest.xml
+
+          if ! cmp --silent pinned.xml latest.xml; then
+            echo "::error::The RAUC D-Bus interface changed between $pinned and $latest."
+            diff -u --label "$pinned" pinned.xml --label "$latest" latest.xml
+          fi
