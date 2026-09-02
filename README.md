@@ -1,6 +1,6 @@
 # rauc
 
-Async Rust bindings for the [Rauc](https://rauc.io/) D-Bus installer API,
+Async Rust bindings for the [Rauc D-Bus]([https://rauc.io/](https://rauc.readthedocs.io/en/latest/reference.html#d-bus-api)) installer API,
 built with [zbus](https://docs.rs/zbus).
 
 ## Compatibility
