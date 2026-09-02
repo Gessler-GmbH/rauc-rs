@@ -51,9 +51,10 @@ jobs:
     name: Rauc
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v6
       - name: Check latest RAUC release
         run: |
-          pinned=v1.15.2
+          pinned=$(cat RAUC_VERSION)
           latest=$(git ls-remote --tags --refs https://github.com/rauc/rauc.git | cut -d/ -f3 | sort -V | tail -1)
 
           interface=src/de.pengutronix.rauc.Installer.xml
