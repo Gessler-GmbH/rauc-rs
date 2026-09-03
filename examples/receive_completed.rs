@@ -1,3 +1,4 @@
+use futures_util::StreamExt;
 use rauc::InstallerProxy;
 use zbus::{Connection, Result};
 
@@ -6,9 +7,12 @@ async fn main() -> Result<()> {
     let connection = Connection::system().await?;
     let proxy = InstallerProxy::new(&connection).await?;
 
-    let reply = proxy.operation().await?;
+    let mut completed = proxy.receive_completed().await?;
 
-    println!("{:?}", reply);
+    if let Some(signal) = completed.next().await {
+        let args = signal.args()?;
+        println!("{:#?}", args.result());
+    }
 
     Ok(())
 }

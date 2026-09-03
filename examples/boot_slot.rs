@@ -6,9 +6,8 @@ async fn main() -> Result<()> {
     let connection = Connection::system().await?;
     let proxy = InstallerProxy::new(&connection).await?;
 
-    let reply = proxy.operation().await?;
-
-    println!("{:?}", reply);
+    let boot_slot = proxy.boot_slot().await?;
+    println!("{boot_slot:#?}");
 
     Ok(())
 }

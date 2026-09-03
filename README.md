@@ -1,19 +1,17 @@
 # rauc
 
-Async Rust bindings for the [RAUC](https://rauc.io/) D-Bus installer API,
+Async Rust bindings for the [Rauc D-Bus](https://rauc.readthedocs.io/en/latest/reference.html#d-bus-api) installer API,
 built with [zbus](https://docs.rs/zbus).
 
 ## Compatibility
 
-| | |
-| --- | --- |
-| **Platform** | Linux |
-| **Rust** | 1.87+ · Edition 2024 |
-| **RAUC** | D-Bus API shipped with 1.15.2 |
-| **Interface** | `de.pengutronix.rauc.Installer` |
-| **Connection** | System bus |
-
-Other RAUC releases may work when they provide a compatible D-Bus API.
+| Component  | Support                       |
+|------------|-------------------------------|
+| Platform   | Linux                         |
+| Connection | System bus                    |
+| Interface  | `de.pengutronix.rauc.Installer` |
+| Rauc       | [RAUC_VERSION](RAUC_VERSION)  |
+| Rust       | 1.87+                         |
 
 ## Installation
 
@@ -30,9 +28,11 @@ use zbus::{Connection, Result};
 #[tokio::main]
 async fn main() -> Result<()> {
     let connection = Connection::system().await?;
-    let installer = InstallerProxy::new(&connection).await?;
+    let proxy = InstallerProxy::new(&connection).await?;
 
-    println!("{}", installer.operation().await?);
+    let slots = proxy.get_slot_status().await?;
+    println!("{slots:#?}");
+
     Ok(())
 }
 ```
@@ -40,26 +40,49 @@ async fn main() -> Result<()> {
 See the [API documentation](https://docs.rs/rauc) for all available methods and
 types.
 
+## Examples
+
 > [!CAUTION]
-> Installing bundles and marking slots modify the target system. Only expose
-> these operations to trusted callers.
-
-## Development
-
-Live RAUC tests are ignored by default:
+> Installing bundles and marking slots modify the target system.
 
 ```bash
-# Read-only tests
-cargo test --test rauc_readonly -- --ignored
+# Each read-only example is named after its RAUC operation
+cargo run --example get_slot_status
 
-# Installs the specified bundle
-RAUC_TEST_BUNDLE=/path/to/update.raucb \
-  cargo test --test rauc_mutating -- --ignored
+# Bundle inspection takes a path or URL
+cargo run --example inspect_bundle -- path/to/update.raucb
+
+# Receives installation progress changes
+cargo run --example receive_progress_changed
+
+# Receives the installation-completed signal
+cargo run --example receive_completed
 ```
 
-The interface is intentionally pinned. If the upstream API changes, update it
-with `./tools/update-interface.sh` and regenerate reference bindings with
-`./tools/generate-interface.sh`.
+```bash
+# Marks a slot as good, bad, or active
+cargo run --example mark -- good booted
+
+# Installs a specified bundle
+cargo run --example install_bundle -- path/to/update.raucb
+```
+
+## Initial interface generation
+
+The initial bindings were generated from RAUC's official installer interface
+for the release in `RAUC_VERSION`:
+
+```bash
+mkdir -p src/generated
+
+RAUC_VERSION=$(cat RAUC_VERSION)
+RAUC_INTERFACE=de.pengutronix.rauc.Installer.xml
+
+curl -L "https://raw.githubusercontent.com/rauc/rauc/${RAUC_VERSION}/src/${RAUC_INTERFACE}" -o "interfaces/${RAUC_INTERFACE}"
+zbus-xmlgen file "interfaces/${RAUC_INTERFACE}" -o src/generated/installer.rs
+```
+
+This records the original setup, not an ongoing maintenance workflow.
 
 ## License
 
