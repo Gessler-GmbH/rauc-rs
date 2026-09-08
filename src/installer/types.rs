@@ -175,36 +175,6 @@ pub struct InspectBundleArgs {
     pub tls_no_verify: Option<bool>,
 }
 
-/// One explicit D-Bus variant layer containing `T`.
-///
-/// Consumes the outer signature and payload explicitly, leaving the inner
-/// variant to `DeserializeValue` for unwrapping and signature validation.
-#[derive(Deserialize)]
-struct Variant<T> {
-    #[allow(dead_code)]
-    signature: Signature,
-    value: T,
-}
-
-// Keep RAUC's two variant layers out of the public metadata API.
-fn decode_variant_layers<'de, D, T>(deserializer: D) -> Result<T, D::Error>
-where
-    D: Deserializer<'de>,
-    T: Deserialize<'de> + Type + 'de,
-{
-    let wrapped = Variant::<DeserializeValue<'de, T>>::deserialize(deserializer)?;
-    Ok(wrapped.value.0)
-}
-
-// Decode both variant layers into Some(T). Missing keys are handled as None.
-fn decode_optional_variant_layers<'de, D, T>(deserializer: D) -> Result<Option<T>, D::Error>
-where
-    D: Deserializer<'de>,
-    T: Deserialize<'de> + Type + 'de,
-{
-    decode_variant_layers(deserializer).map(Some)
-}
-
 /// Metadata read from an inspected bundle.
 ///
 /// RAUC's variant wrappers are consumed during deserialization, exposing only
@@ -361,4 +331,34 @@ pub struct Progress {
     pub message: String,
     /// Nesting level of the current step.
     pub nesting_depth: i32,
+}
+
+/// One explicit D-Bus variant layer containing `T`.
+///
+/// Consumes the outer signature and payload explicitly, leaving the inner
+/// variant to `DeserializeValue` for unwrapping and signature validation.
+#[derive(Deserialize)]
+struct Variant<T> {
+    #[allow(dead_code)]
+    signature: Signature,
+    value: T,
+}
+
+// Keep RAUC's two variant layers out of the public metadata API.
+fn decode_variant_layers<'de, D, T>(deserializer: D) -> Result<T, D::Error>
+where
+    D: Deserializer<'de>,
+    T: Deserialize<'de> + Type + 'de,
+{
+    let wrapped = Variant::<DeserializeValue<'de, T>>::deserialize(deserializer)?;
+    Ok(wrapped.value.0)
+}
+
+// Decode both variant layers into Some(T). Missing keys are handled as None.
+fn decode_optional_variant_layers<'de, D, T>(deserializer: D) -> Result<Option<T>, D::Error>
+where
+    D: Deserializer<'de>,
+    T: Deserialize<'de> + Type + 'de,
+{
+    decode_variant_layers(deserializer).map(Some)
 }
