@@ -1,10 +1,9 @@
 use std::collections::HashMap;
 
-use serde::Deserialize;
+use serde::{Deserialize, Deserializer};
 
-use zbus::zvariant::as_value;
-use zbus::zvariant::{DeserializeDict, SerializeDict};
-use zbus::zvariant::{OwnedValue, Type};
+use zbus::zvariant::{DeserializeDict, DeserializeValue, SerializeDict};
+use zbus::zvariant::{OwnedValue, Signature, Type};
 
 /// Status of a configured artifact repository.
 #[derive(DeserializeDict, Type, PartialEq, Debug)]
@@ -176,36 +175,64 @@ pub struct InspectBundleArgs {
     pub tls_no_verify: Option<bool>,
 }
 
-/// Represents a D-Bus `variant` (`v`) containing any value.
-#[derive(Deserialize, Type, PartialEq, Debug)]
-#[serde(bound(deserialize = "T: Deserialize<'de> + Type + 'de",))]
-#[zvariant(signature = "v")]
-pub struct Variant<T>(
-    /// Value stored in the D-Bus variant.
-    #[serde(with = "as_value")]
-    pub T,
-);
+/// One explicit D-Bus variant layer containing `T`.
+///
+/// Consumes the outer signature and payload explicitly, leaving the inner
+/// variant to `DeserializeValue` for unwrapping and signature validation.
+#[derive(Deserialize)]
+struct Variant<T> {
+    #[allow(dead_code)]
+    signature: Signature,
+    value: T,
+}
+
+// Keep RAUC's two variant layers out of the public metadata API.
+fn decode_variant_layers<'de, D, T>(deserializer: D) -> Result<T, D::Error>
+where
+    D: Deserializer<'de>,
+    T: Deserialize<'de> + Type + 'de,
+{
+    let wrapped = Variant::<DeserializeValue<'de, T>>::deserialize(deserializer)?;
+    Ok(wrapped.value.0)
+}
+
+// Decode both variant layers into Some(T). Missing keys are handled as None.
+fn decode_optional_variant_layers<'de, D, T>(deserializer: D) -> Result<Option<T>, D::Error>
+where
+    D: Deserializer<'de>,
+    T: Deserialize<'de> + Type + 'de,
+{
+    decode_variant_layers(deserializer).map(Some)
+}
 
 /// Metadata read from an inspected bundle.
 ///
-/// RAUC wraps each dictionary value in a D-Bus variant (`v`).
-#[derive(DeserializeDict, Type, PartialEq, Debug)]
-#[zvariant(signature = "a{sv}", rename_all = "kebab-case")]
+/// RAUC's variant wrappers are consumed during deserialization, exposing only
+/// the typed metadata to callers.
+#[derive(Deserialize, Type, PartialEq, Debug)]
+#[zvariant(signature = "a{sv}")]
+#[serde(rename_all = "kebab-case")]
 pub struct InspectBundleInfo {
     /// SHA-256 hash of the bundle manifest.
     pub manifest_hash: String,
     /// Bundle update metadata.
-    pub update: Variant<InspectBundleUpdateInfo>,
+    #[serde(deserialize_with = "decode_variant_layers")]
+    pub update: InspectBundleUpdateInfo,
     /// Bundle format and integrity metadata.
-    pub bundle: Option<Variant<InspectBundleBundleInfo>>,
+    #[serde(default, deserialize_with = "decode_optional_variant_layers")]
+    pub bundle: Option<InspectBundleBundleInfo>,
     /// Hooks declared by the bundle.
-    pub hooks: Option<Variant<InspectBundleHooksInfo>>,
+    #[serde(default, deserialize_with = "decode_optional_variant_layers")]
+    pub hooks: Option<InspectBundleHooksInfo>,
     /// Custom handler declared by the bundle.
-    pub handler: Option<Variant<InspectBundleHandlerInfo>>,
+    #[serde(default, deserialize_with = "decode_optional_variant_layers")]
+    pub handler: Option<InspectBundleHandlerInfo>,
     /// Images contained in the bundle.
-    pub images: Option<Variant<Vec<InspectBundleImageInfo>>>,
+    #[serde(default, deserialize_with = "decode_optional_variant_layers")]
+    pub images: Option<Vec<InspectBundleImageInfo>>,
     /// Custom manifest metadata grouped by section.
-    pub meta: Option<Variant<HashMap<String, HashMap<String, String>>>>,
+    #[serde(default, deserialize_with = "decode_optional_variant_layers")]
+    pub meta: Option<HashMap<String, HashMap<String, String>>>,
 }
 
 /// Update metadata from a bundle manifest.

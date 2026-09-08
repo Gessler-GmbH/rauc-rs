@@ -1,5 +1,8 @@
 ## [Unreleased]
 
+### Fixed
+- Decode nested variants in inspected bundle metadata with newer zvariant versions, exposing typed values directly without variant wrappers.
+
 ## [0.1.0] - 2026-09-01
 
 ### Added
