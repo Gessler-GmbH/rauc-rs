@@ -2,6 +2,7 @@
 
 ### Fixed
 - Decode nested variants in inspected bundle metadata with newer zvariant versions, exposing typed values directly without variant wrappers.
+- Align field optionality with RAUC v1.15.2: accept bundles without a version and make guaranteed bundle metadata, slot configuration, and artifact repository fields required (breaking API change).
 
 ## [0.1.0] - 2026-09-01
 

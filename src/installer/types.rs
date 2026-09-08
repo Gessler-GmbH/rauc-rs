@@ -14,11 +14,11 @@ pub struct ArtifactStatusInfo {
     /// Human-readable repository description.
     pub description: Option<String>,
     /// Repository storage path.
-    pub path: Option<String>,
+    pub path: String,
 
     /// Repository type.
     #[zvariant(rename = "type")]
-    pub r#type: Option<String>,
+    pub r#type: String,
 
     /// Slot-class to which the repository belongs.
     pub parent_class: Option<String>,
@@ -93,13 +93,13 @@ pub type SlotName = String;
 #[zvariant(signature = "a{sv}", rename_all = "kebab-case")]
 pub struct GetSlotStatusInfo {
     /// Slot class, such as `rootfs`.
-    pub class: Option<String>,
+    pub class: String,
     /// Backing device path.
-    pub device: Option<String>,
+    pub device: String,
 
     /// Slot type configured by RAUC.
     #[zvariant(rename = "type")]
-    pub r#type: Option<String>,
+    pub r#type: String,
 
     /// Name used by the bootloader.
     pub bootname: Option<String>,
@@ -189,8 +189,8 @@ pub struct InspectBundleInfo {
     #[serde(deserialize_with = "decode_variant_layers")]
     pub update: InspectBundleUpdateInfo,
     /// Bundle format and integrity metadata.
-    #[serde(default, deserialize_with = "decode_optional_variant_layers")]
-    pub bundle: Option<InspectBundleBundleInfo>,
+    #[serde(deserialize_with = "decode_variant_layers")]
+    pub bundle: InspectBundleBundleInfo,
     /// Hooks declared by the bundle.
     #[serde(default, deserialize_with = "decode_optional_variant_layers")]
     pub hooks: Option<InspectBundleHooksInfo>,
@@ -198,11 +198,11 @@ pub struct InspectBundleInfo {
     #[serde(default, deserialize_with = "decode_optional_variant_layers")]
     pub handler: Option<InspectBundleHandlerInfo>,
     /// Images contained in the bundle.
-    #[serde(default, deserialize_with = "decode_optional_variant_layers")]
-    pub images: Option<Vec<InspectBundleImageInfo>>,
+    #[serde(deserialize_with = "decode_variant_layers")]
+    pub images: Vec<InspectBundleImageInfo>,
     /// Custom manifest metadata grouped by section.
-    #[serde(default, deserialize_with = "decode_optional_variant_layers")]
-    pub meta: Option<HashMap<String, HashMap<String, String>>>,
+    #[serde(deserialize_with = "decode_variant_layers")]
+    pub meta: HashMap<String, HashMap<String, String>>,
 }
 
 /// Update metadata from a bundle manifest.
@@ -212,7 +212,7 @@ pub struct InspectBundleUpdateInfo {
     /// System compatibility identifier from the manifest.
     pub compatible: String,
     /// Bundle version.
-    pub version: String,
+    pub version: Option<String>,
     /// Human-readable bundle description.
     pub description: Option<String>,
     /// Bundle build identifier.
@@ -224,7 +224,7 @@ pub struct InspectBundleUpdateInfo {
 #[zvariant(signature = "a{sv}", rename_all = "kebab-case")]
 pub struct InspectBundleBundleInfo {
     /// Bundle format.
-    pub format: Option<String>,
+    pub format: String,
     /// Size of the verity-protected payload in bytes.
     pub verity_size: Option<u64>,
     /// Salt used by the verity-protected payload.
@@ -238,9 +238,9 @@ pub struct InspectBundleBundleInfo {
 #[zvariant(signature = "a{sv}", rename_all = "kebab-case")]
 pub struct InspectBundleHooksInfo {
     /// Name of the hook executable.
-    pub filename: Option<String>,
+    pub filename: String,
     /// Hooks enabled for the bundle.
-    pub hooks: Option<Vec<String>>,
+    pub hooks: Vec<String>,
 }
 
 /// Custom handler metadata from a bundle manifest.
@@ -248,7 +248,7 @@ pub struct InspectBundleHooksInfo {
 #[zvariant(signature = "a{sv}", rename_all = "kebab-case")]
 pub struct InspectBundleHandlerInfo {
     /// Name of the custom handler executable.
-    pub filename: Option<String>,
+    pub filename: String,
     /// Arguments passed to the custom handler.
     pub args: Option<String>,
 }
@@ -258,7 +258,7 @@ pub struct InspectBundleHandlerInfo {
 #[zvariant(signature = "a{sv}", rename_all = "kebab-case")]
 pub struct InspectBundleImageInfo {
     /// Target slot class.
-    pub slot_class: Option<String>,
+    pub slot_class: String,
     /// Target system variant.
     pub variant: Option<String>,
     /// Image filename within the bundle.
@@ -273,7 +273,7 @@ pub struct InspectBundleImageInfo {
     /// Image size in bytes.
     pub size: Option<u64>,
     /// Hooks enabled for the image.
-    pub hooks: Option<Vec<String>>,
+    pub hooks: Vec<String>,
     /// Adaptive update methods enabled for the image.
     pub adaptive: Option<Vec<String>>,
 }
