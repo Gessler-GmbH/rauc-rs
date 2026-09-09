@@ -1,0 +1,29 @@
+use crate::common::mock::{Dbus, MOCK_DESTINATION};
+use rauc::InstallerProxy;
+
+#[tokio::test]
+async fn decodes_recorded_progress() {
+    let mut dbus = Dbus::new().await.expect("failed to create D-Bus mock");
+
+    let client = dbus.client();
+
+    // The peer-to-peer mock has no bus daemon to resolve service names.
+    let proxy = InstallerProxy::builder(&client)
+        .destination(MOCK_DESTINATION)
+        .expect("invalid mock destination")
+        .build()
+        .await
+        .expect("failed to create installer proxy");
+
+    let (reply, progress) = tokio::join!(
+        dbus.reply(include_str!("../records/properties.json")),
+        proxy.progress(),
+    );
+
+    reply.expect("failed to send recorded D-Bus reply");
+    let progress = progress.expect("failed to get progress");
+
+    assert_eq!(progress.percentage, 100);
+    assert_eq!(progress.message, "Checking bundle done.");
+    assert_eq!(progress.nesting_depth, 1);
+}

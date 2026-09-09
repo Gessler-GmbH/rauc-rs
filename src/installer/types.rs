@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use serde::{Deserialize, Deserializer};
 
+use zbus::zvariant::as_value;
 use zbus::zvariant::{DeserializeDict, DeserializeValue, SerializeDict};
 use zbus::zvariant::{OwnedValue, Signature, Type};
 
@@ -184,6 +185,7 @@ pub struct InspectBundleArgs {
 #[serde(rename_all = "kebab-case")]
 pub struct InspectBundleInfo {
     /// SHA-256 hash of the bundle manifest.
+    #[serde(with = "as_value")]
     pub manifest_hash: String,
     /// Bundle update metadata.
     #[serde(deserialize_with = "decode_variant_layers")]
