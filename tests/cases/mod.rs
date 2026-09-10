@@ -1,8 +1,12 @@
 mod boot_slot;
 mod compatible;
+mod get_artifact_status;
+mod get_primary;
 mod get_slot_status;
 mod inspect_bundle;
+mod install_bundle;
 mod last_error;
+mod mark;
 mod operation;
 mod progress;
 mod variant;
