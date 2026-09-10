@@ -1,2 +1,2 @@
-mod common;
 mod cases;
+mod common;
