@@ -84,6 +84,10 @@ zbus-xmlgen file "interfaces/${RAUC_INTERFACE}" -o src/generated/installer.rs
 
 This records the original setup, not an ongoing maintenance workflow.
 
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution guidelines.
+
 ## License
 
 Licensed under the
