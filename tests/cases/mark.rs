@@ -1,8 +1,22 @@
 use crate::common::mock::Dbus;
-use rauc::InstallerProxy;
+use rauc::{InstallerProxy, MarkState, SlotIdentifier};
 
 #[tokio::test]
 async fn decodes_recorded_mark() {
+    check_mark(SlotIdentifier::Named("rootfs.1".into()), "rootfs.1").await;
+}
+
+#[tokio::test]
+async fn serializes_booted_selector() {
+    check_mark(SlotIdentifier::Booted, "booted").await;
+}
+
+#[tokio::test]
+async fn serializes_other_selector() {
+    check_mark(SlotIdentifier::Other, "other").await;
+}
+
+async fn check_mark(identifier: SlotIdentifier, expected_slot: &str) {
     let mut dbus = Dbus::new().await.expect("failed to create D-Bus mock");
     let client = dbus.client();
     let proxy = InstallerProxy::new(&client)
@@ -11,7 +25,7 @@ async fn decodes_recorded_mark() {
 
     let (reply, result) = tokio::join!(
         dbus.reply(include_str!("../records/mark.json")),
-        proxy.mark("good", "rootfs.1"),
+        proxy.mark(MarkState::Good, &identifier),
     );
 
     let request = reply.expect("failed to send recorded D-Bus reply");
@@ -27,7 +41,7 @@ async fn decodes_recorded_mark() {
         .deserialize()
         .expect("failed to decode request");
     assert_eq!(state, "good");
-    assert_eq!(slot, "rootfs.1");
+    assert_eq!(slot, expected_slot);
 
     let info = result.expect("failed to mark slot");
     assert_eq!(info.slot_name, "rootfs.1");

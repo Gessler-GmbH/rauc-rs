@@ -25,11 +25,11 @@ pub trait Installer {
     fn install_bundle(&self, source: &str, args: InstallBundleArgs) -> Result<()>;
 
     /// Marks a slot as good, bad, or active and returns the affected slot.
-    fn mark(&self, state: &str, slot_identifier: &str) -> Result<MarkInfo>;
+    fn mark(&self, state: MarkState, slot_identifier: &SlotIdentifier) -> Result<MarkInfo>;
 
-    /// Signals that an installation finished, with zero indicating success.
+    /// Signals that an installation finished, preserving any failure code.
     #[zbus(signal)]
-    fn completed(&self, result: i32) -> Result<()>;
+    fn completed(&self, result: InstallationResult) -> Result<()>;
 
     /// Returns the slot from which the system was booted.
     #[zbus(property)]
@@ -45,7 +45,7 @@ pub trait Installer {
 
     /// Returns the operation RAUC is currently performing.
     #[zbus(property)]
-    fn operation(&self) -> Result<String>;
+    fn operation(&self) -> Result<Operation>;
 
     /// Returns the current installation percentage, message, and nesting depth.
     #[zbus(property)]

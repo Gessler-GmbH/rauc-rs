@@ -1,5 +1,5 @@
 use crate::common::mock::{Dbus, MOCK_DESTINATION};
-use rauc::InstallerProxy;
+use rauc::{InstallerProxy, Operation};
 
 #[tokio::test]
 async fn decodes_recorded_operation() {
@@ -23,5 +23,5 @@ async fn decodes_recorded_operation() {
     reply.expect("failed to send recorded D-Bus reply");
     let operation = operation.expect("failed to get operation");
 
-    assert_eq!(operation, "idle");
+    assert_eq!(operation, Operation::Idle);
 }

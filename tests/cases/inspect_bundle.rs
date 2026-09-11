@@ -1,8 +1,21 @@
 use std::collections::HashMap;
 
 use crate::common::mock::Dbus;
-use rauc::{InspectBundleArgs, InstallerProxy};
+use rauc::{BundleFormat, InspectBundleArgs, InstallerProxy};
 use zbus::zvariant::OwnedValue;
+
+#[test]
+fn decodes_bundle_formats() {
+    for (name, expected) in [
+        ("plain", BundleFormat::Plain),
+        ("verity", BundleFormat::Verity),
+        ("crypt", BundleFormat::Crypt),
+    ] {
+        let actual: BundleFormat =
+            serde_json::from_value(serde_json::json!(name)).expect("failed to decode bundle format");
+        assert_eq!(actual, expected);
+    }
+}
 
 #[tokio::test]
 async fn decodes_recorded_inspect_bundle() {
@@ -45,7 +58,7 @@ async fn decodes_recorded_inspect_bundle() {
     assert_eq!(info.update.version.as_deref(), Some("v20200703"));
     assert_eq!(info.update.description.as_deref(), Some("RAUC Demo Bundle"));
     assert_eq!(info.update.build.as_deref(), Some("20260624062251"));
-    assert_eq!(info.bundle.format, "verity");
+    assert_eq!(info.bundle.format, BundleFormat::Verity);
     assert_eq!(info.bundle.verity_size, Some(446_464));
     assert_eq!(
         info.bundle.verity_hash.as_deref(),
