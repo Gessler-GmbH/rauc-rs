@@ -3,6 +3,15 @@
 ### Added
 
 - D-Bus integration tests verifying deserialization of recorded RAUC responses and serialization of method arguments.
+- `MarkState`, `SlotIdentifier`, `BundleFormat`, and `InstallationResult` enums for typed installer interactions.
+- Consistent `Clone` and `Eq` implementations for public data types, with `Copy` and `Hash` for value enums.
+
+### Changed
+
+- Replace string arguments to `mark()` with `MarkState` and `&SlotIdentifier`, return `Operation` from `operation()`,
+  and use `BundleFormat` for inspected bundle formats (breaking API changes).
+- Use `InstallationResult` for the installation-completed signal, mapping zero to success and preserving nonzero
+  failure codes while retaining the D-Bus integer representation (breaking API change).
 
 ### Fixed
 
