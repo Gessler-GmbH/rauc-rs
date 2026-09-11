@@ -11,8 +11,8 @@ fn decodes_bundle_formats() {
         ("verity", BundleFormat::Verity),
         ("crypt", BundleFormat::Crypt),
     ] {
-        let actual: BundleFormat =
-            serde_json::from_value(serde_json::json!(name)).expect("failed to decode bundle format");
+        let actual: BundleFormat = serde_json::from_value(serde_json::json!(name))
+            .expect("failed to decode bundle format");
         assert_eq!(actual, expected);
     }
 }
