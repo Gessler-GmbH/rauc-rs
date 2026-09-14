@@ -5,13 +5,13 @@ built with [zbus](https://docs.rs/zbus).
 
 ## Compatibility
 
-| Component  | Support                       |
-|------------|-------------------------------|
-| Platform   | Linux                         |
-| Connection | System bus                    |
+| Component  | Support                         |
+|------------|---------------------------------|
+| Platform   | Linux                           |
+| Connection | System bus                      |
 | Interface  | `de.pengutronix.rauc.Installer` |
-| Rauc       | [RAUC_VERSION](RAUC_VERSION)  |
-| Rust       | 1.87+                         |
+| Rauc       | [RAUC_VERSION](RAUC_VERSION)    |
+| Rust       | 1.87+                           |
 
 ## Installation
 
@@ -37,13 +37,9 @@ async fn main() -> Result<()> {
 }
 ```
 
-See the [API documentation](https://docs.rs/rauc) for all available methods and
-types.
+See the [API documentation](https://docs.rs/rauc) for all available methods and types.
 
 ## Examples
-
-> [!CAUTION]
-> Installing bundles and marking slots modify the target system.
 
 ```bash
 # Each read-only example is named after its RAUC operation
@@ -59,6 +55,9 @@ cargo run --example receive_progress_changed
 cargo run --example receive_completed
 ```
 
+> [!CAUTION]
+> Installing bundles and marking slots modify the target system.
+
 ```bash
 # Marks a slot as good, bad, or active
 cargo run --example mark -- good booted
@@ -69,8 +68,7 @@ cargo run --example install_bundle -- path/to/update.raucb
 
 ## Initial interface generation
 
-The initial bindings were generated from RAUC's official installer interface
-for the release in `RAUC_VERSION`:
+The initial bindings were generated from RAUC's official installer interface for the release in `RAUC_VERSION`:
 
 ```bash
 mkdir -p src/generated
@@ -91,6 +89,6 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution guidelines.
 ## License
 
 Licensed under the
-[Apache License 2.0](https://github.com/Gessler-GmbH/rauc-rs/blob/main/LICENSE).
-The committed RAUC interface XML is licensed under
+[Apache License 2.0](https://github.com/Gessler-GmbH/rauc-rs/blob/main/LICENSE). The committed RAUC interface XML is
+licensed under
 [CC0-1.0](https://creativecommons.org/publicdomain/zero/1.0/).
