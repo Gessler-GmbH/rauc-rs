@@ -10,7 +10,6 @@ fn decodes_installation_results() {
         (42, InstallationResult::Failure(42)),
     ] {
         let message = Message::signal("/", "de.pengutronix.rauc.Installer", "Completed")
-            .expect("invalid signal header")
             .build(&(code,))
             .expect("failed to build completion signal");
         let (result,): (InstallationResult,) = message

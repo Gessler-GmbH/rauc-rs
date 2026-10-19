@@ -10,7 +10,6 @@ async fn decodes_recorded_last_error() {
     // The peer-to-peer mock has no bus daemon to resolve service names.
     let proxy = InstallerProxy::builder(&client)
         .destination(MOCK_DESTINATION)
-        .expect("invalid mock destination")
         .build()
         .await
         .expect("failed to create installer proxy");

@@ -30,7 +30,7 @@ impl Dbus {
         let guid = Guid::generate();
         let (sender, receiver) = Channel::pair();
 
-        let server = Builder::authenticated_socket(sender, guid.clone())?
+        let server = Builder::authenticated_socket(sender, guid.clone())
             .p2p()
             .build()
             .await?;
@@ -38,7 +38,7 @@ impl Dbus {
         // Subscribe before the client can send any requests.
         let messages = MessageStream::from(&server);
 
-        let client = Builder::authenticated_socket(receiver, guid)?
+        let client = Builder::authenticated_socket(receiver, guid)
             .p2p()
             .build()
             .await?;
@@ -66,7 +66,7 @@ impl Dbus {
             .expect("D-Bus connection closed before receiving a request")?;
 
         let message = unsafe {
-            Message::method_return(&request.header())?.build_raw_body(
+            Message::method_return(&request.header()).build_raw_body(
                 &record.body,
                 record.signature.as_str(),
                 Vec::new(),

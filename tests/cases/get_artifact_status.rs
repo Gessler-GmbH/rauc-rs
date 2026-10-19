@@ -37,27 +37,28 @@ async fn decodes_populated_get_artifact_status() {
     use std::collections::HashMap;
 
     use rauc::{ArtifactStatusArtifactInfo, ArtifactStatusInfo, ArtifactStatusInstanceInfo};
-    use zbus::zvariant::{LE, Value, serialized::Context, to_bytes};
+    use zbus::Variant;
+    use zbus::wire::{LE, serialized::Context, to_bytes};
 
     // Build the wire dictionaries independently of the production structs so
     // incorrect field names or nested signatures cannot pass via a round trip.
     let instance = HashMap::from([
-        ("checksum", Value::from("0123456789abcdef")),
-        ("references", Value::from(vec!["rootfs.0", "rootfs.1"])),
+        ("checksum", Variant::from("0123456789abcdef")),
+        ("references", Variant::from(vec!["rootfs.0", "rootfs.1"])),
     ]);
     let artifact = HashMap::from([
-        ("name", Value::from("application")),
-        ("instances", Value::from(vec![instance])),
+        ("name", Variant::from("application")),
+        ("instances", Variant::from(vec![instance])),
     ]);
     let repository = HashMap::from([
-        ("name", Value::from("apps")),
-        ("description", Value::from("Application repository")),
-        ("path", Value::from("/var/lib/rauc/apps")),
-        ("type", Value::from("files")),
-        ("parent-class", Value::from("rootfs")),
-        ("artifacts", Value::from(vec![artifact])),
+        ("name", Variant::from("apps")),
+        ("description", Variant::from("Application repository")),
+        ("path", Variant::from("/var/lib/rauc/apps")),
+        ("type", Variant::from("files")),
+        ("parent-class", Variant::from("rootfs")),
+        ("artifacts", Variant::from(vec![artifact])),
     ]);
-    let body = to_bytes(Context::new_dbus(LE, 0), &vec![repository])
+    let body = to_bytes(Context::new(LE, 0), &vec![repository])
         .expect("failed to serialize artifact status");
     let record = serde_json::json!({
         "signature": "aa{sv}",
