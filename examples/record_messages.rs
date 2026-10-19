@@ -56,7 +56,7 @@ impl ReplyTracker {
                             .ok()
                             .map(|(interface,)| interface),
                         Some("Set") => body
-                            .deserialize::<(String, String, zbus::zvariant::OwnedValue)>()
+                            .deserialize::<(String, String, zbus::OwnedVariant)>()
                             .ok()
                             .map(|(interface, _, _)| interface),
                         _ => None,
@@ -77,24 +77,24 @@ impl ReplyTracker {
                         && (destination == Some(RAUC_SERVICE)
                             || destination == Some(self.owner.as_str())))
                 {
-                    if let (Some(sender), Some(member)) = (header.sender(), header.member()) {
-                        // Replies have no member name, so remember it from the call.
-                        if !header.primary().flags().contains(Flags::NoReplyExpected) {
-                            self.pending.insert(
-                                (sender.to_string(), header.primary().serial_num()),
-                                (
-                                    member.to_string(),
-                                    if name_lookup {
-                                        BUS_SERVICE
-                                    } else {
-                                        self.owner.as_str()
-                                    }
-                                    .to_string(),
-                                ),
-                            );
-                        }
-                        return Some(member.to_string());
+                    let sender = header.sender()?;
+                    let member = header.member()?;
+                    // Replies have no member name, so remember it from the call.
+                    if !header.primary().flags().contains(Flags::NO_REPLY_EXPECTED) {
+                        self.pending.insert(
+                            (sender.to_string(), header.primary().serial_num()),
+                            (
+                                member.to_string(),
+                                if name_lookup {
+                                    BUS_SERVICE
+                                } else {
+                                    self.owner.as_str()
+                                }
+                                .to_string(),
+                            ),
+                        );
                     }
+                    return Some(member.to_string());
                 }
                 None
             }
@@ -111,7 +111,7 @@ impl ReplyTracker {
                     let body = message.body();
                     let (changed_interface, _, _): (
                         String,
-                        HashMap<String, zbus::zvariant::OwnedValue>,
+                        HashMap<String, zbus::OwnedVariant>,
                         Vec<String>,
                     ) = body.deserialize().ok()?;
                     if changed_interface == INSTALLER_INTERFACE {
@@ -212,7 +212,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             decoded: if body.is_empty() {
                 serde_json::json!([])
             } else {
-                let arguments: zbus::zvariant::Structure<'_> = body.deserialize()?;
+                let arguments: zbus::Structure<'_> = body.deserialize()?;
                 serde_json::to_value(&arguments)?
             },
         };
@@ -245,28 +245,28 @@ mod tests {
             owner: ":1.42".into(),
             pending: HashMap::new(),
         };
-        let call = zbus::Message::method_call("/", "GetPrimary")?
-            .interface(INSTALLER_INTERFACE)?
-            .destination(RAUC_SERVICE)?
-            .sender(":1.10")?
+        let call = zbus::Message::method_call("/", "GetPrimary")
+            .interface(INSTALLER_INTERFACE)
+            .destination(RAUC_SERVICE)
+            .sender(":1.10")
             .build(&())?;
         assert_eq!(
             tracker.recorded_method(&call).as_deref(),
             Some("GetPrimary")
         );
 
-        let wrong_sender = zbus::Message::method_return(&call.header())?
-            .sender(":1.99")?
+        let wrong_sender = zbus::Message::method_return(&call.header())
+            .sender(":1.99")
             .build(&"rootfs.0")?;
         assert!(tracker.recorded_method(&wrong_sender).is_none());
-        let wrong_caller = zbus::Message::method_return(&call.header())?
-            .sender(":1.42")?
-            .destination(":1.11")?
+        let wrong_caller = zbus::Message::method_return(&call.header())
+            .sender(":1.42")
+            .destination(":1.11")
             .build(&"rootfs.0")?;
         assert!(tracker.recorded_method(&wrong_caller).is_none());
 
-        let reply = zbus::Message::method_return(&call.header())?
-            .sender(":1.42")?
+        let reply = zbus::Message::method_return(&call.header())
+            .sender(":1.42")
             .build(&"rootfs.0")?;
         assert_eq!(
             tracker.recorded_method(&reply).as_deref(),
@@ -278,15 +278,15 @@ mod tests {
             tracker.recorded_method(&call).as_deref(),
             Some("GetPrimary")
         );
-        let error = zbus::Message::error(&call.header(), "de.pengutronix.rauc.Error.Failed")?
-            .sender(":1.42")?
+        let error = zbus::Message::error(&call.header(), "de.pengutronix.rauc.Error.Failed")
+            .sender(":1.42")
             .build(&"Failed")?;
         assert_eq!(
             tracker.recorded_method(&error).as_deref(),
             Some("GetPrimary")
         );
-        let signal = zbus::Message::signal("/", INSTALLER_INTERFACE, "Completed")?
-            .sender(":1.42")?
+        let signal = zbus::Message::signal("/", INSTALLER_INTERFACE, "Completed")
+            .sender(":1.42")
             .build(&(0i32,))?;
         assert_eq!(
             tracker.recorded_method(&signal).as_deref(),
@@ -306,9 +306,9 @@ mod tests {
             (":1.99", INSTALLER_INTERFACE, None),
             (":1.42", "org.example.Other", None),
         ] {
-            let changed = HashMap::from([("Progress", zbus::zvariant::Value::from(42i32))]);
-            let signal = zbus::Message::signal("/", PROPERTIES_INTERFACE, "PropertiesChanged")?
-                .sender(sender)?
+            let changed = HashMap::from([("Progress", zbus::Variant::from(42i32))]);
+            let signal = zbus::Message::signal("/", PROPERTIES_INTERFACE, "PropertiesChanged")
+                .sender(sender)
                 .build(&(interface, changed, vec!["Operation"]))?;
             assert_eq!(tracker.recorded_method(&signal).as_deref(), expected);
         }
@@ -324,18 +324,16 @@ mod tests {
                         owner: ":1.42".into(),
                         pending: HashMap::new(),
                     };
-                    let builder = zbus::Message::method_call("/", member)?
-                        .interface(PROPERTIES_INTERFACE)?
-                        .destination(destination)?
-                        .sender(":1.10")?;
+                    let builder = zbus::Message::method_call("/", member)
+                        .interface(PROPERTIES_INTERFACE)
+                        .destination(destination)
+                        .sender(":1.10");
                     let call = match member {
                         "Get" => builder.build(&(interface, "Operation"))?,
                         "GetAll" => builder.build(&(interface,))?,
-                        _ => builder.build(&(
-                            interface,
-                            "Operation",
-                            zbus::zvariant::Value::from("idle"),
-                        ))?,
+                        _ => {
+                            builder.build(&(interface, "Operation", zbus::Variant::from("idle")))?
+                        }
                     };
                     let expected =
                         if destination != "org.example.Other" && interface == INSTALLER_INTERFACE {
@@ -344,16 +342,16 @@ mod tests {
                             None
                         };
                     assert_eq!(tracker.recorded_method(&call).as_deref(), expected);
-                    let reply = zbus::Message::method_return(&call.header())?
-                        .sender(":1.42")?
+                    let reply = zbus::Message::method_return(&call.header())
+                        .sender(":1.42")
                         .build(&())?;
                     assert_eq!(tracker.recorded_method(&reply).as_deref(), expected);
                     assert!(tracker.recorded_method(&reply).is_none());
 
                     assert_eq!(tracker.recorded_method(&call).as_deref(), expected);
                     let error =
-                        zbus::Message::error(&call.header(), "org.freedesktop.DBus.Error.Failed")?
-                            .sender(":1.42")?
+                        zbus::Message::error(&call.header(), "org.freedesktop.DBus.Error.Failed")
+                            .sender(":1.42")
                             .build(&"Failed")?;
                     assert_eq!(tracker.recorded_method(&error).as_deref(), expected);
                 }
@@ -369,26 +367,26 @@ mod tests {
             pending: HashMap::new(),
         };
         for name in [RAUC_SERVICE, "org.example.Other"] {
-            let call = zbus::Message::method_call("/org/freedesktop/DBus", "GetNameOwner")?
-                .interface(BUS_SERVICE)?
-                .destination(BUS_SERVICE)?
-                .sender(":1.10")?
+            let call = zbus::Message::method_call("/org/freedesktop/DBus", "GetNameOwner")
+                .interface(BUS_SERVICE)
+                .destination(BUS_SERVICE)
+                .sender(":1.10")
                 .build(&(name,))?;
             let expected = (name == RAUC_SERVICE).then_some("GetNameOwner");
             assert_eq!(tracker.recorded_method(&call).as_deref(), expected);
-            let wrong_sender = zbus::Message::method_return(&call.header())?
-                .sender(":1.42")?
+            let wrong_sender = zbus::Message::method_return(&call.header())
+                .sender(":1.42")
                 .build(&(":1.42",))?;
             assert!(tracker.recorded_method(&wrong_sender).is_none());
-            let reply = zbus::Message::method_return(&call.header())?
-                .sender(BUS_SERVICE)?
+            let reply = zbus::Message::method_return(&call.header())
+                .sender(BUS_SERVICE)
                 .build(&(":1.42",))?;
             assert_eq!(tracker.recorded_method(&reply).as_deref(), expected);
             assert!(tracker.recorded_method(&reply).is_none());
             assert_eq!(tracker.recorded_method(&call).as_deref(), expected);
             let error =
-                zbus::Message::error(&call.header(), "org.freedesktop.DBus.Error.NameHasNoOwner")?
-                    .sender(BUS_SERVICE)?
+                zbus::Message::error(&call.header(), "org.freedesktop.DBus.Error.NameHasNoOwner")
+                    .sender(BUS_SERVICE)
                     .build(&"No owner")?;
             assert_eq!(tracker.recorded_method(&error).as_deref(), expected);
         }

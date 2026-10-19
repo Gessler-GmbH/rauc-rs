@@ -13,7 +13,8 @@ built with [zbus](https://docs.rs/zbus).
 | Connection | System bus                    |
 | Interface  | `de.pengutronix.rauc.Installer` |
 | RAUC       | [RAUC_VERSION](RAUC_VERSION)   |
-| Rust       | 1.87+                         |
+| Rust       | 1.89+                         |
+| zbus       | 6.x                           |
 
 ## Installation
 

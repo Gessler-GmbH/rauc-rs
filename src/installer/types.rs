@@ -2,13 +2,12 @@ use std::collections::HashMap;
 
 use serde::{Deserialize, Deserializer, Serialize};
 
-use zbus::zvariant::as_value;
-use zbus::zvariant::{DeserializeDict, DeserializeValue, SerializeDict};
-use zbus::zvariant::{OwnedValue, Signature, Type};
+use zbus::as_variant;
+use zbus::{DeserializeDict, OwnedVariant, SerializeDict, Signature, Type};
 
 /// Status of a configured artifact repository.
 #[derive(DeserializeDict, Type, Debug, Clone, PartialEq, Eq)]
-#[zvariant(signature = "a{sv}", rename_all = "kebab-case")]
+#[zbus(signature = "a{sv}", rename_all = "kebab-case")]
 pub struct ArtifactStatusInfo {
     /// Repository name.
     pub name: String,
@@ -18,7 +17,7 @@ pub struct ArtifactStatusInfo {
     pub path: String,
 
     /// Repository type.
-    #[zvariant(rename = "type")]
+    #[zbus(rename = "type")]
     pub r#type: String,
 
     /// Slot-class to which the repository belongs.
@@ -29,7 +28,7 @@ pub struct ArtifactStatusInfo {
 
 /// Status of an artifact stored in a repository.
 #[derive(DeserializeDict, Type, Debug, Clone, PartialEq, Eq)]
-#[zvariant(signature = "a{sv}", rename_all = "kebab-case")]
+#[zbus(signature = "a{sv}", rename_all = "kebab-case")]
 pub struct ArtifactStatusArtifactInfo {
     /// Artifact name.
     pub name: String,
@@ -39,7 +38,7 @@ pub struct ArtifactStatusArtifactInfo {
 
 /// Status of one artifact instance.
 #[derive(DeserializeDict, Type, Debug, Clone, PartialEq, Eq)]
-#[zvariant(signature = "a{sv}", rename_all = "kebab-case")]
+#[zbus(signature = "a{sv}", rename_all = "kebab-case")]
 pub struct ArtifactStatusInstanceInfo {
     /// Checksum identifying the instance.
     pub checksum: String,
@@ -50,7 +49,7 @@ pub struct ArtifactStatusInstanceInfo {
 /// Runtime state of a slot.
 #[derive(Deserialize, Type, Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[serde(rename_all = "lowercase")]
-#[zvariant(signature = "s")]
+#[zbus(signature = "s")]
 pub enum SlotState {
     /// The system was booted from this slot.
     Booted,
@@ -63,7 +62,7 @@ pub enum SlotState {
 /// Bootloader status of a slot.
 #[derive(Deserialize, Type, Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[serde(rename_all = "lowercase")]
-#[zvariant(signature = "s")]
+#[zbus(signature = "s")]
 pub enum SlotBootStatus {
     /// The slot is considered bootable.
     Good,
@@ -76,7 +75,7 @@ pub enum SlotBootStatus {
 /// Result of the most recent installation to a slot.
 #[derive(Deserialize, Type, Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[serde(rename_all = "lowercase")]
-#[zvariant(signature = "s")]
+#[zbus(signature = "s")]
 pub enum SlotInstallationStatus {
     /// Installation completed successfully.
     Ok,
@@ -91,7 +90,7 @@ pub type SlotName = String;
 
 /// Slot selector accepted by the mark operation.
 #[derive(Type, Debug, Clone, PartialEq, Eq, Hash)]
-#[zvariant(signature = "s")]
+#[zbus(signature = "s")]
 pub enum SlotIdentifier {
     /// Select the currently booted slot.
     Booted,
@@ -123,7 +122,7 @@ impl Serialize for SlotIdentifier {
 
 /// Status and metadata of a RAUC slot.
 #[derive(DeserializeDict, Type, Debug, Clone, PartialEq, Eq)]
-#[zvariant(signature = "a{sv}", rename_all = "kebab-case")]
+#[zbus(signature = "a{sv}", rename_all = "kebab-case")]
 pub struct GetSlotStatusInfo {
     /// Slot class, such as `rootfs`.
     pub class: String,
@@ -131,7 +130,7 @@ pub struct GetSlotStatusInfo {
     pub device: String,
 
     /// Slot type configured by RAUC.
-    #[zvariant(rename = "type")]
+    #[zbus(rename = "type")]
     pub r#type: String,
 
     /// Name used by the bootloader.
@@ -152,49 +151,49 @@ pub struct GetSlotStatusInfo {
     pub size: Option<u64>,
 
     /// ISO 8601 timestamp when the last installation completed.
-    #[zvariant(rename = "installed.timestamp")]
+    #[zbus(rename = "installed.timestamp")]
     pub installed_timestamp: Option<String>,
 
     /// Number of images written to the slot.
-    #[zvariant(rename = "installed.count")]
+    #[zbus(rename = "installed.count")]
     pub installed_count: Option<u32>,
 
     /// Transaction UUID of the last installation.
-    #[zvariant(rename = "installed.transaction")]
+    #[zbus(rename = "installed.transaction")]
     pub installed_transaction: Option<String>,
 
     /// ISO 8601 timestamp when the slot was last activated.
-    #[zvariant(rename = "activated.timestamp")]
+    #[zbus(rename = "activated.timestamp")]
     pub activated_timestamp: Option<String>,
 
     /// Number of times the slot has been activated.
-    #[zvariant(rename = "activated.count")]
+    #[zbus(rename = "activated.count")]
     pub activated_count: Option<u32>,
 
     /// Compatibility identifier from the last installed bundle.
-    #[zvariant(rename = "bundle.compatible")]
+    #[zbus(rename = "bundle.compatible")]
     pub bundle_compatible: Option<String>,
 
     /// Version from the last installed bundle.
-    #[zvariant(rename = "bundle.version")]
+    #[zbus(rename = "bundle.version")]
     pub bundle_version: Option<String>,
 
     /// Description from the last installed bundle.
-    #[zvariant(rename = "bundle.description")]
+    #[zbus(rename = "bundle.description")]
     pub bundle_description: Option<String>,
 
     /// Build identifier from the last installed bundle.
-    #[zvariant(rename = "bundle.build")]
+    #[zbus(rename = "bundle.build")]
     pub bundle_build: Option<String>,
 
     /// Manifest hash of the last installed bundle.
-    #[zvariant(rename = "bundle.hash")]
+    #[zbus(rename = "bundle.hash")]
     pub bundle_hash: Option<String>,
 }
 
 /// Options for inspecting a local or remote bundle.
 #[derive(SerializeDict, DeserializeDict, Type, Debug, Clone, PartialEq, Eq, Default)]
-#[zvariant(signature = "a{sv}", rename_all = "kebab-case")]
+#[zbus(signature = "a{sv}", rename_all = "kebab-case")]
 pub struct InspectBundleArgs {
     /// Certificate file or PKCS#11 URL used for TLS client authentication.
     pub tls_cert: Option<String>,
@@ -213,11 +212,11 @@ pub struct InspectBundleArgs {
 /// RAUC's variant wrappers are consumed during deserialization, exposing only
 /// the typed metadata to callers.
 #[derive(Deserialize, Type, Debug, Clone, PartialEq, Eq)]
-#[zvariant(signature = "a{sv}")]
+#[zbus(signature = "a{sv}")]
 #[serde(rename_all = "kebab-case")]
 pub struct InspectBundleInfo {
     /// SHA-256 hash of the bundle manifest.
-    #[serde(with = "as_value")]
+    #[serde(with = "as_variant")]
     pub manifest_hash: String,
     /// Bundle update metadata.
     #[serde(deserialize_with = "decode_variant_layers")]
@@ -241,7 +240,7 @@ pub struct InspectBundleInfo {
 
 /// Update metadata from a bundle manifest.
 #[derive(DeserializeDict, Type, Debug, Clone, PartialEq, Eq)]
-#[zvariant(signature = "a{sv}", rename_all = "kebab-case")]
+#[zbus(signature = "a{sv}", rename_all = "kebab-case")]
 pub struct InspectBundleUpdateInfo {
     /// System compatibility identifier from the manifest.
     pub compatible: String,
@@ -256,7 +255,7 @@ pub struct InspectBundleUpdateInfo {
 /// Format used to package a RAUC bundle.
 #[derive(Deserialize, Type, Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[serde(rename_all = "lowercase")]
-#[zvariant(signature = "s")]
+#[zbus(signature = "s")]
 pub enum BundleFormat {
     /// Plain bundle format.
     Plain,
@@ -268,7 +267,7 @@ pub enum BundleFormat {
 
 /// Bundle format and integrity metadata.
 #[derive(DeserializeDict, Type, Debug, Clone, PartialEq, Eq)]
-#[zvariant(signature = "a{sv}", rename_all = "kebab-case")]
+#[zbus(signature = "a{sv}", rename_all = "kebab-case")]
 pub struct InspectBundleBundleInfo {
     /// Bundle format.
     pub format: BundleFormat,
@@ -282,7 +281,7 @@ pub struct InspectBundleBundleInfo {
 
 /// Hook metadata from a bundle manifest.
 #[derive(DeserializeDict, Type, Debug, Clone, PartialEq, Eq)]
-#[zvariant(signature = "a{sv}", rename_all = "kebab-case")]
+#[zbus(signature = "a{sv}", rename_all = "kebab-case")]
 pub struct InspectBundleHooksInfo {
     /// Name of the hook executable.
     pub filename: String,
@@ -292,7 +291,7 @@ pub struct InspectBundleHooksInfo {
 
 /// Custom handler metadata from a bundle manifest.
 #[derive(DeserializeDict, Type, Debug, Clone, PartialEq, Eq)]
-#[zvariant(signature = "a{sv}", rename_all = "kebab-case")]
+#[zbus(signature = "a{sv}", rename_all = "kebab-case")]
 pub struct InspectBundleHandlerInfo {
     /// Name of the custom handler executable.
     pub filename: String,
@@ -302,7 +301,7 @@ pub struct InspectBundleHandlerInfo {
 
 /// Metadata for an image contained in a bundle.
 #[derive(DeserializeDict, Type, Debug, Clone, PartialEq, Eq)]
-#[zvariant(signature = "a{sv}", rename_all = "kebab-case")]
+#[zbus(signature = "a{sv}", rename_all = "kebab-case")]
 pub struct InspectBundleImageInfo {
     /// Target slot class.
     pub slot_class: String,
@@ -312,7 +311,7 @@ pub struct InspectBundleImageInfo {
     pub filename: Option<String>,
 
     /// Image type.
-    #[zvariant(rename = "type")]
+    #[zbus(rename = "type")]
     pub r#type: Option<String>,
 
     /// SHA-256 checksum of the original image.
@@ -327,7 +326,7 @@ pub struct InspectBundleImageInfo {
 
 /// Options for installing a local or remote bundle.
 #[derive(SerializeDict, DeserializeDict, Type, Debug, Clone, PartialEq, Eq, Default)]
-#[zvariant(signature = "a{sv}", rename_all = "kebab-case")]
+#[zbus(signature = "a{sv}", rename_all = "kebab-case")]
 pub struct InstallBundleArgs {
     /// Whether to ignore a mismatch with the system compatibility identifier.
     pub ignore_compatible: Option<bool>,
@@ -352,7 +351,7 @@ pub struct InstallBundleArgs {
 /// Action used to mark a slot.
 #[derive(Serialize, Deserialize, Type, Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[serde(rename_all = "lowercase")]
-#[zvariant(signature = "s")]
+#[zbus(signature = "s")]
 pub enum MarkState {
     /// Mark the slot as bootable.
     Good,
@@ -363,7 +362,7 @@ pub enum MarkState {
 }
 
 /// Result of marking a slot as good, bad, or active.
-#[derive(OwnedValue, Type, Deserialize, Debug, Clone, PartialEq, Eq)]
+#[derive(OwnedVariant, Type, Deserialize, Debug, Clone, PartialEq, Eq)]
 pub struct MarkInfo {
     /// Name of the slot that was marked.
     pub slot_name: String,
@@ -372,8 +371,9 @@ pub struct MarkInfo {
 }
 
 /// Operation currently performed by RAUC.
-#[derive(OwnedValue, Type, Deserialize, Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[zvariant(signature = "s", rename_all = "lowercase")]
+#[derive(OwnedVariant, Type, Deserialize, Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[zbus(signature = "s", rename_all = "lowercase")]
+#[serde(rename_all = "lowercase")]
 pub enum Operation {
     /// RAUC is not performing an operation.
     Idle,
@@ -384,7 +384,7 @@ pub enum Operation {
 /// Result reported by the installation completion signal.
 #[derive(Deserialize, Type, Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[serde(from = "i32")]
-#[zvariant(signature = "i")]
+#[zbus(signature = "i")]
 pub enum InstallationResult {
     /// Installation completed successfully (result code zero).
     Success,
@@ -402,7 +402,7 @@ impl From<i32> for InstallationResult {
 }
 
 /// Progress of the current installation operation.
-#[derive(OwnedValue, Deserialize, Debug, Clone, PartialEq, Eq)]
+#[derive(OwnedVariant, Type, Deserialize, Debug, Clone, PartialEq, Eq)]
 pub struct Progress {
     /// Completion percentage from 0 to 100.
     pub percentage: i32,
@@ -415,7 +415,7 @@ pub struct Progress {
 /// One explicit D-Bus variant layer containing `T`.
 ///
 /// Consumes the outer signature and payload explicitly, leaving the inner
-/// variant to `DeserializeValue` for unwrapping and signature validation.
+/// variant to `as_variant::Deserialize` for unwrapping and signature validation.
 #[derive(Deserialize)]
 struct Variant<T> {
     #[allow(dead_code)]
@@ -429,7 +429,7 @@ where
     D: Deserializer<'de>,
     T: Deserialize<'de> + Type + 'de,
 {
-    let wrapped = Variant::<DeserializeValue<'de, T>>::deserialize(deserializer)?;
+    let wrapped = Variant::<as_variant::Deserialize<'de, T>>::deserialize(deserializer)?;
     Ok(wrapped.value.0)
 }
 

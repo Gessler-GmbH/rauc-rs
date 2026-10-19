@@ -2,7 +2,7 @@ use crate::common::mock::Dbus;
 use std::collections::HashMap;
 
 use rauc::{InstallBundleArgs, InstallerProxy};
-use zbus::zvariant::OwnedValue;
+use zbus::OwnedVariant;
 
 #[tokio::test]
 async fn decodes_recorded_install_bundle() {
@@ -28,7 +28,7 @@ async fn decodes_recorded_install_bundle() {
         Some("de.pengutronix.rauc.Installer"),
     );
     assert_eq!(header.path().map(|path| path.as_str()), Some("/"));
-    let (source, options): (String, HashMap<String, OwnedValue>) = request
+    let (source, options): (String, HashMap<String, OwnedVariant>) = request
         .body()
         .deserialize()
         .expect("failed to decode request");

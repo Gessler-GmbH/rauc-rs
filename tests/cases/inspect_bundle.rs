@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use crate::common::mock::Dbus;
 use rauc::{BundleFormat, InspectBundleArgs, InstallerProxy};
-use zbus::zvariant::OwnedValue;
+use zbus::OwnedVariant;
 
 #[test]
 fn decodes_bundle_formats() {
@@ -42,7 +42,7 @@ async fn decodes_recorded_inspect_bundle() {
         Some("de.pengutronix.rauc.Installer"),
     );
     assert_eq!(header.path().map(|path| path.as_str()), Some("/"));
-    let (requested_source, options): (String, HashMap<String, OwnedValue>) = request
+    let (requested_source, options): (String, HashMap<String, OwnedVariant>) = request
         .body()
         .deserialize()
         .expect("failed to decode request");

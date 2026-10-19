@@ -1,5 +1,13 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- Upgrade zbus to 6.0.0. Consumers passing a `zbus::Connection` to
+  `InstallerProxy` must also use zbus 6.
+- Raise the minimum supported Rust version from 1.87 to 1.89.
+
 ## [0.1.0] - 2026-09-01
 
 ### Added

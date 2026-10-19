@@ -2,7 +2,7 @@
 name = "rauc"
 version = "0.1.0"
 edition = "2024"
-rust-version = "1.87"
+rust-version = "1.89"
 description = "Build reliable embedded Linux updates with Rust."
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/Gessler-GmbH/rauc-rs"
@@ -14,9 +14,9 @@ categories = ["api-bindings", "asynchronous", "embedded"]
 [dependencies]
 tokio = { version = "1", default-features = false, features = ["macros", "rt-multi-thread"] }
 serde = { version = "1.0", features = ["derive"] }
-zbus = { version = "5.16.0", default-features = false, features = ["tokio"] }
+zbus = { version = "6.0.0", default-features = false, features = ["tokio", "proxy", "tracing"] }
 
 [dev-dependencies]
 futures-util = { version = "0.3.34" }
 serde_json = "1"
-zbus = { version = "5.16.0", default-features = false, features = ["p2p"] }
+zbus = { version = "6.0.0", default-features = false, features = ["p2p"] }
