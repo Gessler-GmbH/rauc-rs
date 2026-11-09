@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- Fix bundle inspection error when a bundle has hooks.
+
 ### Changed
 
 - Upgrade zbus to 6.0.0. Consumers passing a `zbus::Connection` to
