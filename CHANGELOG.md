@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-10
+
 ### Fixed
 
 - Fix bundle inspection error when a bundle has hooks.
@@ -22,4 +24,5 @@
 - Installer properties, progress updates, and completion signals.
 - Usage examples and D-Bus integration tests.
 
+[0.2.0]: https://github.com/Gessler-GmbH/rauc-rs/releases/tag/v0.2.0
 [0.1.0]: https://github.com/Gessler-GmbH/rauc-rs/releases/tag/v0.1.0
