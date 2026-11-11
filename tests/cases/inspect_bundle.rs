@@ -52,23 +52,25 @@ async fn decodes_recorded_inspect_bundle() {
     let info = info.expect("failed to inspect bundle");
     assert_eq!(
         info.manifest_hash,
-        "0becf71e55f5fac7a4d5cf07a8dc05f7622f70617c9d6aae47d936586e23ae5a",
+        "8e4bf5602a6c6939285adca7e611140c8608fc6589d8ba7d210496ffbdafa754",
     );
     assert_eq!(info.update.compatible, "raspberrypi5");
     assert_eq!(info.update.version.as_deref(), Some("v20200703"));
     assert_eq!(info.update.description.as_deref(), Some("RAUC Demo Bundle"));
-    assert_eq!(info.update.build.as_deref(), Some("20260624062251"));
+    assert_eq!(info.update.build.as_deref(), Some("20261109160215"));
     assert_eq!(info.bundle.format, BundleFormat::Verity);
     assert_eq!(info.bundle.verity_size, Some(446_464));
     assert_eq!(
         info.bundle.verity_hash.as_deref(),
-        Some("977963773e7a13d405b020bf5059b00bfa7a5b67f37860e262192fbbf7b873f5"),
+        Some("92ea6486317ea5ca78caed37999f2d49601859c87afb5c3999d5a5a566636009"),
     );
     assert_eq!(
         info.bundle.verity_salt.as_deref(),
-        Some("4ceca11a5d984d90a259c7a66d0eb9e81806016423ee42143bb03173a3fdfcfa"),
+        Some("e64dd557916a3ec8baa7389fe74f8bc2cb672c99be4c487bed4ccd7c2037f7c0"),
     );
-    assert!(info.hooks.is_none());
+    let hooks = info.hooks.as_ref().expect("bundle hooks missing");
+    assert_eq!(hooks.filename, "hook.sh");
+    assert!(hooks.hooks.is_empty());
     assert!(info.handler.is_none());
     assert!(info.meta.is_empty());
 
@@ -83,9 +85,9 @@ async fn decodes_recorded_inspect_bundle() {
     assert_eq!(image.size, Some(205_520_896));
     assert_eq!(
         image.checksum.as_deref(),
-        Some("2e9ad3d9ce442f4fc84035d7a74139005178e879c7bb96c10213bd98b3fb3484"),
+        Some("b07599bae1f745420b847b528ddc37050b99884ee419b626f8e9a08a2f5c1fd4"),
     );
-    assert!(image.hooks.is_empty());
+    assert_eq!(image.hooks, ["post-install"]);
     assert!(image.variant.is_none());
     assert!(image.adaptive.is_none());
 }

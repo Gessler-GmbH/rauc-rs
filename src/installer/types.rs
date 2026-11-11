@@ -280,12 +280,15 @@ pub struct InspectBundleBundleInfo {
 }
 
 /// Hook metadata from a bundle manifest.
-#[derive(DeserializeDict, Type, Debug, Clone, PartialEq, Eq)]
-#[zbus(signature = "a{sv}", rename_all = "kebab-case")]
+#[derive(Deserialize, Type, Debug, Clone, PartialEq, Eq)]
+#[zbus(signature = "a{sv}")]
+#[serde(rename_all = "kebab-case")]
 pub struct InspectBundleHooksInfo {
     /// Name of the hook executable.
+    #[serde(with = "as_variant")]
     pub filename: String,
     /// Hooks enabled for the bundle.
+    #[serde(deserialize_with = "decode_variant_layers")]
     pub hooks: Vec<String>,
 }
 
